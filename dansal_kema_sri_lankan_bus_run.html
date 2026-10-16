@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html lang="si" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Dansal Kema — Sri Lankan Bus Run</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Gemunu+Libre:wght@700;800&family=Inter:wght@500;700;800&family=Noto+Sans+Sinhala:wght@700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #1e1b4b 0%, #090d16 70%, #020617 100%);
+      color: #f8fafc;
+      font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .font-arcade {
+      font-family: 'Bungee', 'Gemunu Libre', cursive;
+    }
+
+    .font-sinhala {
+      font-family: 'Noto Sans Sinhala', 'Gemunu Libre', sans-serif;
+    }
+
+    /* Responsive 1:1 Square Arcade Preview Container */
+    .arcade-frame {
+      position: relative;
+      width: min(95vw, 82vh, 620px);
+      height: min(95vw, 82vh, 620px);
+      aspect-ratio: 1 / 1;
+      border-radius: 22px;
+      padding: 7px;
+      background: linear-gradient(135deg, #f59e0b 0%, #ec4899 50%, #3b82f6 100%);
+      box-shadow:
+        0 0 35px rgba(236, 72, 153, 0.45),
+        0 20px 50px rgba(0, 0, 0, 0.85),
+        inset 0 0 12px rgba(255, 255, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .canvas-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #0f172a;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px solid #1e293b;
+    }
+
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+    }
+
+    /* CSS Flashing Neon Party Lights Animation for Bus Taillights & Underglow */
+    @keyframes neonPartyTaillights {
+      0% {
+        box-shadow: 0 0 14px #ff007f, 0 0 28px #ff007f, 0 10px 30px #00f0ff;
+        filter: drop-shadow(0 0 10px #ff007f) hue-rotate(0deg);
+      }
+      25% {
+        box-shadow: 0 0 16px #00ff66, 0 0 32px #facc15, 0 10px 30px #ff007f;
+        filter: drop-shadow(0 0 12px #00ff66) hue-rotate(90deg);
+      }
+      50% {
+        box-shadow: 0 0 16px #00f0ff, 0 0 34px #3b82f6, 0 10px 35px #facc15;
+        filter: drop-shadow(0 0 12px #00f0ff) hue-rotate(180deg);
+      }
+      75% {
+        box-shadow: 0 0 18px #facc15, 0 0 34px #ec4899, 0 10px 30px #a855f7;
+        filter: drop-shadow(0 0 12px #facc15) hue-rotate(270deg);
+      }
+      100% {
+        box-shadow: 0 0 14px #ff007f, 0 0 28px #ff007f, 0 10px 30px #00f0ff;
+        filter: drop-shadow(0 0 10px #ff007f) hue-rotate(360deg);
+      }
+    }
+
+    @keyframes taillightBlink {
+      0%, 100% { opacity: 1; transform: scale(1.08); }
+      50% { opacity: 0.35; transform: scale(0.92); }
+    }
+
+    .party-lights-glow {
+      animation: neonPartyTaillights 0.9s infinite linear;
+    }
+
+    /* CSS Neon Taillight Nodes overlaid on the Garage & Live Bus */
+    .css-taillight-strip {
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .css-taillight-node {
+      animation: taillightBlink 0.28s infinite alternate;
+    }
+
+    /* Custom Toggle Switch Styling */
+    .toggle-checkbox:checked + .toggle-slot {
+      background: linear-gradient(90deg, #ec4899, #f59e0b);
+      border-color: #fde047;
+    }
+
+    .toggle-checkbox:checked + .toggle-slot .toggle-dot {
+      transform: translateX(20px);
+      background-color: #ffffff;
+    }
+
+    @keyframes automakerLogoPulse {
+      0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 18px rgba(239, 68, 68, 0.65));
+      }
+      50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 30px rgba(245, 158, 11, 0.85));
+      }
+    }
+
+    @keyframes automakerBarLoad {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    .automaker-logo-anim {
+      animation: automakerLogoPulse 2s infinite ease-in-out;
+    }
+
+    .automaker-progress-fill {
+      animation: automakerBarLoad 2.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="w-full max-w-[620px] px-3 mb-1.5 flex items-center justify-between gap-2 z-20">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 via-pink-500 to-purple-600 flex items-center justify-center shadow-md shadow-pink-500/30 text-base">
+        🍛
+      </div>
+      <div>
+        <div class="flex items-center gap-1.5">
+          <h1 class="font-arcade text-xs sm:text-sm tracking-wider bg-gradient-to-r from-amber-300 via-fuchsia-400 to-cyan-300 bg-clip-text text-transparent leading-tight">
+            DANSAL KEMA — SL BUS RUN
+          </h1>
+          <span class="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-950/80 border border-red-500/40 text-[9px] font-bold text-amber-300 tracking-wide">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+            Powered by Automaker
+          </span>
+        </div>
+        <p class="text-[10px] text-slate-400 font-sinhala">
+          දන්සල් වන්දනාව • <span id="activeSkinBadge" class="text-fuchsia-400 font-semibold">VIP Dam Rajina Skin</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1.5">
+      <button
+        id="openGarageBtn"
+        type="button"
+        class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-[11px] font-bold text-amber-300 transition flex items-center gap-1 cursor-pointer"
+      >
+        <span>🛠️</span>
+        <span>GARAGE</span>
+      </button>
+
+      <button
+        id="hornTopBtn"
+        type="button"
+        class="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-[11px] font-bold text-cyan-300 transition flex items-center gap-1 cursor-pointer"
+        title="Blast Air Horn (Key: H or Space)"
+      >
+        <span>🎺</span>
+        <span class="hidden sm:inline">PEEP!</span>
+      </button>
+
+      <button
+        id="muteBtn"
+        type="button"
+        class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-200 transition cursor-pointer"
+        title="Toggle Retro Sound Effects"
+      >
+        🔊
+      </button>
+    </div>
+  </header>
+
+  <main class="arcade-frame">
+    <div class="canvas-inner">
+      <canvas id="gameCanvas" width="600" height="600"></canvas>
+
+      <!-- Persistent Small "Powered by Automaker" Corner Badge on the Game Viewport -->
+      <div
+        id="automakerCornerBadge"
+        class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-950/85 border border-red-500/40 shadow-md backdrop-blur-sm"
+      >
+        <span class="w-3.5 h-3.5 rounded-full bg-black border border-red-500 flex items-center justify-center overflow-hidden">
+          <img
+            src="20240914_220739.jpg"
+            alt=""
+            class="w-full h-full object-cover"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+          />
+          <svg viewBox="0 0 32 32" class="w-3 h-3 hidden">
+            <circle cx="16" cy="16" r="15" fill="#000" stroke="#ef4444" stroke-width="2"/>
+            <path d="M8 20 L11 12 L21 12 L24 20 Z" fill="#ef4444"/>
+          </svg>
+        </span>
+        <span class="text-[9px] uppercase tracking-wider text-slate-300 font-semibold">
+          Powered by <strong class="text-red-400 font-extrabold italic">Automaker</strong>
+        </span>
+      </div>
+
+      <!-- Startup Automaker Logo Splash Screen Overlay -->
+      <div
+        id="automakerSplash"
+        class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center p-6 text-center transition-opacity duration-500 cursor-pointer"
+        title="Click to Skip"
+      >
+        <!-- Ambient Red/Gold Glow Behind Logo -->
+        <div class="relative flex items-center justify-center mb-4">
+          <div class="absolute w-52 h-52 rounded-full bg-gradient-to-tr from-red-600/30 via-amber-500/20 to-transparent blur-2xl"></div>
+
+          <!-- Automaker Circular Emblem (Loads 20240914_220739.jpg with Built-in High-Detail SVG Replica Fallback) -->
+          <div class="w-44 h-44 sm:w-52 sm:h-52 rounded-full relative flex items-center justify-center automaker-logo-anim">
+            <img
+              id="automakerSplashImg"
+              src="20240914_220739.jpg"
+              alt="Automaker Logo"
+              class="w-full h-full object-contain rounded-full"
+              onerror="this.style.display='none'; document.getElementById('automakerFallbackSvg').classList.remove('hidden');"
+            />
+
+            <!-- Built-in Replica of the Uploaded Automaker Red Lion + Sports Car Logo -->
+            <svg
+              id="automakerFallbackSvg"
+              viewBox="0 0 300 300"
+              class="w-full h-full hidden"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ff0000" />
+                  <stop offset="55%" stop-color="#f59e0b" />
+                  <stop offset="100%" stop-color="#991b1b" />
+                </linearGradient>
+                <linearGradient id="maneGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+                  <stop offset="0%" stop-color="#ff1111" />
+                  <stop offset="70%" stop-color="#dc2626" />
+                  <stop offset="100%" stop-color="#7f1d1d" />
+                </linearGradient>
+                <linearGradient id="carHood" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#ff2a2a" />
+                  <stop offset="100%" stop-color="#990000" />
+                </linearGradient>
+              </defs>
+
+              <!-- Black Circle Base + Red/Gold Outer Ring -->
+              <circle cx="150" cy="150" r="144" fill="#000000" stroke="url(#ringGrad)" stroke-width="6" />
+
+              <!-- Fierce Red Lion Mane Silhouette Behind Car -->
+              <path
+                d="M150 28 L164 46 L185 35 L188 55 L218 48 L210 72 L238 78 L224 98 L248 112 L226 132 L242 156 L74 156 L58 132 L74 112 L52 98 L62 78 L90 72 L82 48 L112 55 L115 35 L136 46 Z"
+                fill="url(#maneGrad)"
+              />
+              <!-- Lion Ears -->
+              <polygon points="85,54 115,62 96,86" fill="#ef4444" />
+              <polygon points="92,60 110,65 98,80" fill="#000000" />
+              <polygon points="215,54 185,62 204,86" fill="#ef4444" />
+              <polygon points="208,60 190,65 202,80" fill="#000000" />
+
+              <!-- Lion Forehead & Glowing White Eyes -->
+              <path d="M112 72 Q150 62 188 72 L180 105 L120 105 Z" fill="#e11d48" />
+              <polygon points="118,86 138,91 124,96" fill="#ffffff" />
+              <polygon points="182,86 162,91 176,96" fill="#ffffff" />
+
+              <!-- Lower Mane Spikes Beneath Text -->
+              <path
+                d="M90 215 L100 245 L112 222 L128 265 L140 232 L150 278 L162 232 L175 262 L188 222 L200 245 L210 215 Z"
+                fill="url(#maneGrad)"
+              />
+
+              <!-- Red Sports Car Front View -->
+              <!-- Side Mirrors -->
+              <path d="M56 120 L78 116 L76 128 L58 128 Z" fill="#ef4444" stroke="#ffffff" stroke-width="1.5" />
+              <path d="M244 120 L222 116 L224 128 L242 128 Z" fill="#ef4444" stroke="#ffffff" stroke-width="1.5" />
+
+              <!-- Windshield -->
+              <path d="M98 100 Q150 93 202 100 L218 134 L82 134 Z" fill="#090d16" stroke="#dc2626" stroke-width="3" />
+
+              <!-- Car Body & Hood -->
+              <path
+                d="M64 134 Q55 152 56 184 L244 184 Q245 152 236 134 L218 134 L82 134 Z"
+                fill="url(#carHood)"
+              />
+              <!-- Hood Crease Lines -->
+              <line x1="115" y1="136" x2="124" y2="152" stroke="#ffffff" stroke-width="2.5" />
+              <line x1="185" y1="136" x2="176" y2="152" stroke="#ffffff" stroke-width="2.5" />
+
+              <!-- Aggressive LED Headlights -->
+              <polygon points="64,145 96,158 90,168 60,158" fill="#1e293b" stroke="#ffffff" stroke-width="2" />
+              <polygon points="236,145 204,158 210,168 240,158" fill="#1e293b" stroke="#ffffff" stroke-width="2" />
+
+              <!-- Black Front Grille -->
+              <path d="M98 164 Q150 156 202 164 L208 186 L92 186 Z" fill="#000000" />
+
+              <!-- Bold Italic "Automaker" Text Across Center -->
+              <text
+                x="150"
+                y="212"
+                text-anchor="middle"
+                fill="#ffffff"
+                font-family="Inter, sans-serif"
+                font-weight="900"
+                font-style="italic"
+                font-size="40"
+                letter-spacing="1"
+                style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.95));"
+              >
+                Automaker
+              </text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- "Powered by Automaker" Startup Text & Loading Bar -->
+        <p class="text-[11px] uppercase tracking-[0.28em] text-amber-400 font-bold mb-0.5">
+          POWERED BY
+        </p>
+        <h2 class="text-2xl sm:text-3xl font-extrabold italic tracking-wider text-white drop-shadow-[0_2px_10px_rgba(239,68,68,0.8)]">
+          Automaker
+        </h2>
+        <p class="text-[11px] text-slate-400 font-sinhala mt-1 mb-4">
+          ශ්‍රී ලංකා බස් සහ දන්සල් වන්දනාව • Starting Engine...
+        </p>
+
+        <!-- Progress Bar -->
+        <div class="w-48 sm:w-56 h-2 bg-slate-900 rounded-full overflow-hidden border border-red-500/40 p-0.5">
+          <div class="h-full bg-gradient-to-r from-red-600 via-amber-400 to-red-500 rounded-full automaker-progress-fill"></div>
+        </div>
+
+        <span class="text-[10px] text-slate-500 mt-3 uppercase tracking-widest">
+          Tap anywhere to continue
+        </span>
+      </div>
+
+      <!-- DOM/CSS Flashing Neon Taillight Overlay synced to Player Bus Position -->
+      <div
+        id="liveCssPartyLights"
+        class="css-taillight-strip absolute z-10 hidden"
+        style="width: 110px; height: 42px; left: 245px; top: 515px;"
+      >
+        <div class="w-full h-full rounded-lg party-lights-glow flex items-end justify-between px-2 pb-1">
+          <div class="flex gap-1">
+            <span class="css-taillight-node w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_10px_#ff007f]"></span>
+            <span class="css-taillight-node w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_#00f0ff]" style="animation-delay:0.1s"></span>
+            <span class="css-taillight-node w-2.5 h-2.5 rounded-full bg-yellow-300 shadow-[0_0_10px_#facc15]" style="animation-delay:0.2s"></span>
+          </div>
+          <div class="flex gap-1">
+            <span class="css-taillight-node w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981]" style="animation-delay:0.15s"></span>
+            <span class="css-taillight-node w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_10px_#ff007f]" style="animation-delay:0.05s"></span>
+            <span class="css-taillight-node w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_#00f0ff]" style="animation-delay:0.25s"></span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="garageModal"
+        class="absolute inset-0 z-30 bg-slate-950/92 backdrop-blur-md flex flex-col items-center justify-between p-3 sm:p-5 text-center transition-opacity duration-200 overflow-y-auto"
+      >
+        <!-- Top Title Banner -->
+        <div class="w-full flex flex-col items-center">
+          <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-1">
+            <span>☸️</span>
+            <span>VESAK &amp; POSON DANSAL RUNNER</span>
+            <span>☸️</span>
+          </div>
+          <h2 id="menuHeading" class="font-arcade text-xl sm:text-2xl text-amber-300 drop-shadow-[0_3px_0_#9a3412] tracking-wide">
+            DANSAL KEMA — BUS GARAGE
+          </h2>
+          <p id="menuSubQuote" class="font-sinhala text-xs sm:text-sm text-cyan-300 font-bold mt-0.5">
+            "කමු කමු! බඩගිනි වෙන්නත් එපා — බඩ පැලෙන්න කන්නත් එපා!"
+          </p>
+        </div>
+
+        <!-- Game Over Stats Summary (Hidden on initial launch) -->
+        <div id="gameOverBanner" class="hidden w-full max-w-[460px] bg-rose-950/80 border-2 border-rose-500/60 rounded-xl p-2.5 my-1 shadow-lg">
+          <p id="gameOverReason" class="font-sinhala text-xs sm:text-sm font-extrabold text-amber-300 mb-1">
+            බඩ පැලෙන්න කෑවා!
+          </p>
+          <div class="grid grid-cols-3 gap-2 text-center border-t border-rose-800/70 pt-1.5">
+            <div>
+              <span class="block text-[9px] text-rose-300 uppercase">Score</span>
+              <span id="finalScoreText" class="font-arcade text-sm sm:text-base text-white">0</span>
+            </div>
+            <div>
+              <span class="block text-[9px] text-rose-300 uppercase">Dansal Eaten</span>
+              <span id="finalDansalText" class="font-arcade text-sm sm:text-base text-emerald-300">0</span>
+            </div>
+            <div>
+              <span class="block text-[9px] text-rose-300 uppercase">Best Score</span>
+              <span id="bestScoreText" class="font-arcade text-sm sm:text-base text-amber-300">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center Garage Preview + Customization Controls -->
+        <div class="w-full max-w-[490px] grid grid-cols-1 sm:grid-cols-12 gap-3 items-center bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-inner my-1">
+          <!-- Live Rear-View Bus Preview Box -->
+          <div class="sm:col-span-5 flex flex-col items-center justify-center bg-slate-950 rounded-xl p-2.5 border border-slate-800 relative">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Rear View Preview</span>
+            <div id="garagePreviewWrapper" class="relative flex items-center justify-center rounded-xl p-1 transition-all duration-300">
+              <canvas id="garagePreviewCanvas" width="150" height="170" class="w-[125px] h-[142px] sm:w-[140px] sm:h-[160px]"></canvas>
+            </div>
+            <span id="previewSkinName" class="text-[11px] font-sinhala font-bold text-fuchsia-300 mt-1">
+              දම් රැජිණ (image_9bd949.png)
+            </span>
+          </div>
+
+          <!-- Customization Options -->
+          <div class="sm:col-span-7 flex flex-col gap-2 text-left">
+            <!-- 1. Skin Selection -->
+            <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2">
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-amber-300 mb-1.5">
+                1. Choose Bus Rear Skin:
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  id="selectBaseSkinBtn"
+                  type="button"
+                  class="px-2.5 py-2 rounded-lg border-2 border-slate-700 bg-slate-900 hover:bg-slate-800 text-left transition flex flex-col cursor-pointer"
+                >
+                  <span class="text-xs font-extrabold text-white flex items-center justify-between">
+                    <span>🚌 Base White</span>
+                    <span id="baseSkinCheck" class="text-[10px] text-slate-400">○</span>
+                  </span>
+                  <span class="text-[9px] text-slate-400 truncate">image_9bd969.png</span>
+                </button>
+
+                <button
+                  id="selectVipSkinBtn"
+                  type="button"
+                  class="px-2.5 py-2 rounded-lg border-2 border-fuchsia-500 bg-fuchsia-950/40 hover:bg-fuchsia-900/50 text-left transition flex flex-col cursor-pointer"
+                >
+                  <span class="text-xs font-extrabold text-fuchsia-300 flex items-center justify-between">
+                    <span>👑 VIP Pink</span>
+                    <span id="vipSkinCheck" class="text-[10px] text-fuchsia-300">●</span>
+                  </span>
+                  <span class="text-[9px] text-fuchsia-200/80 truncate">image_9bd949.png</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Accessories Toggle Switches -->
+            <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2 space-y-2">
+              <span class="block text-[10px] font-bold uppercase tracking-wider text-cyan-300">
+                2. Rear Accessories (Modify Bus):
+              </span>
+
+              <!-- Party Lights Switch -->
+              <label class="flex items-center justify-between cursor-pointer py-0.5">
+                <div>
+                  <span class="block text-xs font-bold text-slate-100">🚨 Neon Party Lights</span>
+                  <span class="block text-[10px] text-slate-400">Flashing DJ LED Taillights &amp; Underglow</span>
+                </div>
+                <div class="relative">
+                  <input id="togglePartyLights" type="checkbox" class="sr-only toggle-checkbox" checked />
+                  <div class="toggle-slot w-11 h-6 bg-slate-800 border-2 border-slate-600 rounded-full transition-colors flex items-center px-0.5">
+                    <div class="toggle-dot w-4 h-4 bg-slate-300 rounded-full transition-transform"></div>
+                  </div>
+                </div>
+              </label>
+
+              <!-- Roof Spoiler Switch -->
+              <label class="flex items-center justify-between cursor-pointer py-0.5 border-t border-slate-800/80 pt-1.5">
+                <div>
+                  <span class="block text-xs font-bold text-slate-100">🏎️ Stylish Roof Spoiler</span>
+                  <span class="block text-[10px] text-slate-400">Aero Wing mounted on top roof</span>
+                </div>
+                <div class="relative">
+                  <input id="toggleSpoiler" type="checkbox" class="sr-only toggle-checkbox" checked />
+                  <div class="toggle-slot w-11 h-6 bg-slate-800 border-2 border-slate-600 rounded-full transition-colors flex items-center px-0.5">
+                    <div class="toggle-dot w-4 h-4 bg-slate-300 rounded-full transition-transform"></div>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <!-- Gameplay Rules Mini Tip -->
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg px-2.5 py-1.5 text-[10px] text-amber-200 leading-snug">
+              <strong>⚖️ බඩ (Stomach Rule):</strong> Eat Dansal food (🍛🥤🍦) so you don't starve (<strong>0%</strong>), but dodge food when near <strong>100% FULL</strong> or your stomach bursts!
+            </div>
+          </div>
+        </div>
+
+        <!-- Start / Drive Button & Powered by Automaker Tag -->
+        <div class="w-full flex flex-col items-center gap-1.5">
+          <button
+            id="startDriveBtn"
+            type="button"
+            class="w-full max-w-[360px] py-2.5 sm:py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-pink-500 to-fuchsia-500 hover:from-amber-300 hover:to-fuchsia-400 text-slate-950 font-arcade text-sm sm:text-base tracking-wider shadow-xl shadow-fuchsia-500/30 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span>🚌</span>
+            <span id="startDriveBtnText">START DANSAL RUN! (යමු!)</span>
+          </button>
+
+          <!-- Subtle Powered by Automaker pill inside Garage Menu -->
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/70 border border-red-500/30 text-[10px] text-slate-400">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+            <span>Powered by <strong class="text-white italic font-bold">Automaker</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="w-full max-w-[620px] px-3 mt-1.5 flex items-center justify-between gap-2 z-20">
+    <button
+      id="footerLeftBtn"
+      type="button"
+      class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-amber-400 active:text-slate-950 border-2 border-slate-600 text-slate-100 font-arcade text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg cursor-pointer"
+    >
+      <span>⬅️</span>
+      <span>SWERVE LEFT</span>
+    </button>
+
+    <button
+      id="footerHornBtn"
+      type="button"
+      class="px-4 py-2 rounded-xl bg-gradient-to-b from-cyan-400 to-blue-600 text-slate-950 font-arcade text-xs sm:text-sm border-2 border-white/60 shadow-lg flex items-center justify-center gap-1 active:scale-95 cursor-pointer"
+    >
+      <span>🎺</span>
+      <span>HORN</span>
+    </button>
+
+    <button
+      id="footerRightBtn"
+      type="button"
+      class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-amber-400 active:text-slate-950 border-2 border-slate-600 text-slate-100 font-arcade text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg cursor-pointer"
+    >
+      <span>SWERVE RIGHT</span>
+      <span>➡️</span>
+    </button>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const garageCanvas = document.getElementById('garagePreviewCanvas');
+      const garageCtx = garageCanvas.getContext('2d');
+      const garagePreviewWrapper = document.getElementById('garagePreviewWrapper');
+      const liveCssPartyLights = document.getElementById('liveCssPartyLights');
+
+      const garageModal = document.getElementById('garageModal');
+      const openGarageBtn = document.getElementById('openGarageBtn');
+      const startDriveBtn = document.getElementById('startDriveBtn');
+      const startDriveBtnText = document.getElementById('startDriveBtnText');
+
+      const selectBaseSkinBtn = document.getElementById('selectBaseSkinBtn');
+      const selectVipSkinBtn = document.getElementById('selectVipSkinBtn');
+      const baseSkinCheck = document.getElementById('baseSkinCheck');
+      const vipSkinCheck = document.getElementById('vipSkinCheck');
+      const previewSkinName = document.getElementById('previewSkinName');
+      const activeSkinBadge = document.getElementById('activeSkinBadge');
+
+      const togglePartyLights = document.getElementById('togglePartyLights');
+      const toggleSpoiler = document.getElementById('toggleSpoiler');
+
+      const gameOverBanner = document.getElementById('gameOverBanner');
+      const gameOverReason = document.getElementById('gameOverReason');
+      const finalScoreText = document.getElementById('finalScoreText');
+      const finalDansalText = document.getElementById('finalDansalText');
+      const bestScoreText = document.getElementById('bestScoreText');
+
+      const muteBtn = document.getElementById('muteBtn');
+      const hornTopBtn = document.getElementById('hornTopBtn');
+      const footerLeftBtn = document.getElementById('footerLeftBtn');
+      const footerRightBtn = document.getElementById('footerRightBtn');
+      const footerHornBtn = document.getElementById('footerHornBtn');
+      const automakerSplash = document.getElementById('automakerSplash');
+
+      let audioCtx = null;
+      let isMuted = false;
+
+      function dismissAutomakerSplash() {
+        if (!automakerSplash || automakerSplash.classList.contains('pointer-events-none')) return;
+        automakerSplash.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+          automakerSplash.style.display = 'none';
+        }, 520);
+      }
+
+      if (automakerSplash) {
+        automakerSplash.addEventListener('click', () => {
+          initAudio();
+          playSynthTone(523.25, 'sawtooth', 0.1, 0, 0.1);
+          playSynthTone(659.25, 'sawtooth', 0.16, 0.09, 0.12);
+          dismissAutomakerSplash();
+        });
+      }
+
+      function initAudio() {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            audioCtx = new AudioContextClass();
+          }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      }
+
+      function playSynthTone(freq, type, duration, delay = 0, vol = 0.14) {
+        if (isMuted || !audioCtx) return;
+        try {
+          const now = audioCtx.currentTime + delay;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(vol, now + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + duration + 0.02);
+        } catch (_) {}
+      }
+
+      function playBusAirHorn() {
+        initAudio();
+        const notes = [
+          { f: 523.25, d: 0.08, t: 0.0 },
+          { f: 659.25, d: 0.08, t: 0.09 },
+          { f: 783.99, d: 0.08, t: 0.18 },
+          { f: 659.25, d: 0.08, t: 0.27 },
+          { f: 880.00, d: 0.22, t: 0.36 }
+        ];
+        notes.forEach(n => {
+          playSynthTone(n.f, 'sawtooth', n.d, n.t, 0.14);
+          playSynthTone(n.f * 1.5, 'square', n.d, n.t, 0.05);
+        });
+      }
+
+      function playEatFoodSound(stomachPercent) {
+        initAudio();
+        // Pitch rises as the stomach gets fuller!
+        const basePitch = 440 + (stomachPercent / 100) * 380;
+        playSynthTone(basePitch, 'sine', 0.09, 0, 0.16);
+        playSynthTone(basePitch * 1.25, 'triangle', 0.14, 0.07, 0.16);
+      }
+
+      function playStomachWarningSound() {
+        initAudio();
+        playSynthTone(220, 'square', 0.12, 0, 0.12);
+        playSynthTone(196, 'square', 0.12, 0.14, 0.12);
+      }
+
+      function playGameOverSound(isCrash = false) {
+        initAudio();
+        if (isCrash && audioCtx && !isMuted) {
+          try {
+            const now = audioCtx.currentTime;
+            const bufSize = audioCtx.sampleRate * 0.35;
+            const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buf;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(480, now);
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.28, now);
+            gain.gain.exponentialRampToValueAtTime(0.008, now + 0.34);
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            noise.start(now);
+          } catch (_) {}
+        }
+        // Sad descending arcade trombone
+        playSynthTone(392.0, 'sawtooth', 0.18, 0.05, 0.14);
+        playSynthTone(369.99, 'sawtooth', 0.18, 0.23, 0.14);
+        playSynthTone(349.23, 'sawtooth', 0.18, 0.41, 0.14);
+        playSynthTone(311.13, 'sawtooth', 0.40, 0.59, 0.16);
+      }
+
+      const externalSkins = {
+        base: { img: new Image(), loaded: false },
+        vip: { img: new Image(), loaded: false }
+      };
+
+      // Load requested "image_9bd969.png" (plain white bus)
+      externalSkins.base.img.onload = () => {
+        externalSkins.base.loaded = true;
+        renderGaragePreview();
+      };
+      externalSkins.base.img.src = 'image_9bd969.png';
+
+      // Load requested "image_9bd949.png" (customized pink VIP bus)
+      externalSkins.vip.img.onload = () => {
+        externalSkins.vip.loaded = true;
+        renderGaragePreview();
+      };
+      externalSkins.vip.img.src = 'image_9bd949.png';
+
+      // High-detail procedural offscreen replica of image_9bd969.png (Plain White Bus) & image_9bd949.png (VIP Pink "දම් රැජිණ" Bus)
+      function createBakedRearBusSprite(mode) {
+        const off = document.createElement('canvas');
+        off.width = 220;
+        off.height = 250;
+        const c = off.getContext('2d');
+        const isVip = mode === 'vip';
+
+        c.save();
+        // Outer Bus Rear Body Shell with rounded top corners
+        c.beginPath();
+        c.moveTo(22, 46);
+        c.quadraticCurveTo(22, 18, 56, 16);
+        c.lineTo(164, 16);
+        c.quadraticCurveTo(198, 18, 198, 46);
+        c.lineTo(198, 224);
+        c.lineTo(22, 224);
+        c.closePath();
+        c.clip();
+
+        if (isVip) {
+          // Customized Pink/Magenta DJ Bus ("image_9bd949.png" - S & S Group / දම් රැජිණ Luxury Edition)
+          const bgGrad = c.createLinearGradient(0, 16, 0, 224);
+          bgGrad.addColorStop(0, '#ec4899');
+          bgGrad.addColorStop(0.35, '#db2777');
+          bgGrad.addColorStop(0.65, '#c026d3');
+          bgGrad.addColorStop(1, '#581c87');
+          c.fillStyle = bgGrad;
+          c.fillRect(20, 14, 180, 212);
+
+          // Top Corner Green/Blue Floral/Peacock Art
+          c.fillStyle = '#34d399';
+          c.beginPath();
+          c.arc(38, 30, 16, 0, Math.PI * 2);
+          c.arc(182, 30, 16, 0, Math.PI * 2);
+          c.fill();
+
+          // Lower DJ Concert Crowd & Purple Laser Beams Airbrush Artwork
+          const laserGrad = c.createRadialGradient(110, 190, 5, 110, 185, 85);
+          laserGrad.addColorStop(0, '#ffffff');
+          laserGrad.addColorStop(0.25, '#f472b6');
+          laserGrad.addColorStop(0.7, '#9333ea');
+          laserGrad.addColorStop(1, '#1e1b4b');
+          c.fillStyle = laserGrad;
+          c.fillRect(22, 128, 176, 96);
+
+          // Silhouette Concert Hands / DJ Figure at bottom right
+          c.fillStyle = 'rgba(15, 23, 42, 0.78)';
+          c.beginPath();
+          c.arc(52, 212, 14, 0, Math.PI * 2);
+          c.arc(82, 216, 12, 0, Math.PI * 2);
+          c.arc(135, 215, 13, 0, Math.PI * 2);
+          c.arc(178, 175, 16, 0, Math.PI * 2);
+          c.fill();
+        } else {
+          // Plain White Ashok Leyland Base Bus ("image_9bd969.png")
+          c.fillStyle = '#ffffff';
+          c.fillRect(20, 14, 180, 212);
+
+          // Center Engine Hatch Panel Outline
+          c.strokeStyle = '#cbd5e1';
+          c.lineWidth = 1.5;
+          c.strokeRect(66, 152, 88, 62);
+          c.beginPath();
+          c.arc(110, 182, 6, 0, Math.PI * 2);
+          c.stroke();
+        }
+
+        // Top Destination Board Capsule
+        c.fillStyle = isVip ? '#be185d' : '#bfc5ce';
+        c.strokeStyle = '#090d16';
+        c.lineWidth = 3;
+        c.beginPath();
+        c.roundRect(54, 21, 112, 22, 10);
+        c.fill();
+        c.stroke();
+
+        if (isVip) {
+          c.fillStyle = '#a3e635';
+          c.font = '800 11px "Inter", sans-serif';
+          c.textAlign = 'center';
+          c.fillText('S & S Group', 110, 36);
+        }
+
+        // Rear Windshield Glass
+        const glassGrad = c.createLinearGradient(30, 48, 180, 118);
+        glassGrad.addColorStop(0, '#475569');
+        glassGrad.addColorStop(0.5, '#334155');
+        glassGrad.addColorStop(1, '#1e293b');
+        c.fillStyle = glassGrad;
+        c.strokeStyle = '#090d16';
+        c.lineWidth = 3.5;
+        c.beginPath();
+        c.roundRect(32, 48, 156, 68, 12);
+        c.fill();
+        c.stroke();
+
+        // Diagonal Glass Reflection Streak
+        c.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        c.beginPath();
+        c.moveTo(45, 50);
+        c.lineTo(75, 50);
+        c.lineTo(100, 114);
+        c.lineTo(70, 114);
+        c.closePath();
+        c.fill();
+
+        if (isVip) {
+          // Black Lower Banner inside Rear Windshield with "දම් රැජිණ LUXURY EDITION..."
+          c.fillStyle = '#090d16';
+          c.beginPath();
+          c.roundRect(34, 92, 152, 23, [0, 0, 10, 10]);
+          c.fill();
+
+          // "දම් රැජිණ" Half-White Half-Pink Stencil Text
+          c.font = '800 16px "Noto Sans Sinhala", sans-serif';
+          c.textAlign = 'left';
+          c.fillStyle = '#ffffff';
+          c.fillText('දම් රැජිණ', 42, 109);
+          c.fillStyle = '#ec4899';
+          c.fillRect(42, 104, 78, 6);
+          c.fillStyle = '#f472b6';
+          c.fillText('දම් රැජිණ', 42, 109);
+
+          // "LUXURY EDITION..." right side text
+          c.font = 'italic 800 8px "Inter", sans-serif';
+          c.fillStyle = '#ffffff';
+          c.fillText('LUXURY', 134, 102);
+          c.fillStyle = '#ec4899';
+          c.fillText('EDITION...', 131, 111);
+        }
+
+        // Horizontal Waist Trim Bar below windshield
+        c.fillStyle = isVip ? '#db2777' : '#cbd5e1';
+        c.fillRect(22, 121, 176, 6);
+
+        // Upper Triple Square Amber Lights (Left & Right clusters of 3, matching image_9bd969 & image_9bd949)
+        const drawTripleLights = (startX, y) => {
+          c.fillStyle = '#7f1d1d';
+          c.strokeStyle = '#334155';
+          c.lineWidth = 1.5;
+          c.fillRect(startX - 2, y - 2, 42, 15);
+          c.strokeRect(startX - 2, y - 2, 42, 15);
+
+          for (let i = 0; i < 3; i++) {
+            c.fillStyle = '#f97316';
+            c.fillRect(startX + i * 13, y, 11, 11);
+            c.strokeStyle = '#fef08a';
+            c.lineWidth = 1;
+            c.strokeRect(startX + i * 13 + 1, y + 1, 9, 9);
+          }
+        };
+        drawTripleLights(34, 134);
+        drawTripleLights(146, 134);
+
+        // Center Silver Plate & Black Bumper Shelf
+        c.fillStyle = '#cbd5e1';
+        c.fillRect(96, 132, 28, 19);
+        c.fillStyle = '#090d16';
+        c.fillRect(96, 132, 28, 4);
+        c.fillRect(66, 151, 88, 5);
+
+        // Lower Bumper Taillights (Round Amber + Red/White/Amber Cluster on Left & Right)
+        const drawLowerCluster = (isLeft) => {
+          const baseX = isLeft ? 32 : 152;
+          const circleX = isLeft ? 31 : 189;
+          // Round orange indicator
+          c.fillStyle = '#f59e0b';
+          c.beginPath();
+          c.arc(circleX, 209, 5, 0, Math.PI * 2);
+          c.fill();
+
+          // Rectangular Red/White/Orange lamp
+          const rectX = isLeft ? 40 : 152;
+          c.fillStyle = '#dc2626';
+          c.fillRect(rectX, 203, 28, 12);
+          c.fillStyle = '#f8fafc';
+          c.fillRect(rectX + 10, 203, 8, 6);
+          c.fillStyle = '#f97316';
+          c.fillRect(rectX + 19, 203, 9, 12);
+        };
+        drawLowerCluster(true);
+        drawLowerCluster(false);
+
+        c.restore();
+
+        // Bottom Black & White Steel Bumper Bar
+        c.fillStyle = '#090d16';
+        c.strokeStyle = '#f8fafc';
+        c.lineWidth = 2;
+        c.fillRect(20, 222, 180, 7);
+        c.strokeRect(20, 222, 180, 7);
+
+        // Dark Bus Tires peeking from underneath left & right
+        c.fillStyle = '#090d16';
+        c.beginPath();
+        c.roundRect(26, 228, 28, 16, 4);
+        c.roundRect(166, 228, 28, 16, 4);
+        c.fill();
+
+        return off;
+      }
+
+      const bakedBaseBus = createBakedRearBusSprite('base');
+      const bakedVipBus = createBakedRearBusSprite('vip');
+
+      function drawCustomizedBus(targetCtx, centerX, centerY, width, height, config, timeTick) {
+        targetCtx.save();
+        targetCtx.translate(centerX, centerY);
+
+        // Subtle engine vibration
+        const rumbleY = Math.sin(timeTick * 0.45) * 1.1;
+        targetCtx.translate(0, rumbleY);
+
+        // 1. Ground Shadow / Neon Underglow Beams
+        if (config.partyLights) {
+          // Animated Rainbow Disco Light Rays projecting onto the road behind the bus (like the reference image!)
+          const rayColors = ['#ff0055', '#ff9900', '#ffee00', '#00ff66', '#00ccff', '#aa00ff', '#ff00aa'];
+          for (let r = 0; r < rayColors.length; r++) {
+            const offset = (r - 3) * (width * 0.13);
+            const pulse = 0.55 + 0.45 * Math.sin(timeTick * 0.25 + r * 0.9);
+            const rayGrad = targetCtx.createLinearGradient(
+              offset,
+              height * 0.36,
+              offset * 1.45,
+              height * 0.68
+            );
+            rayGrad.addColorStop(0, rayColors[r]);
+            rayGrad.addColorStop(1, 'rgba(0,0,0,0)');
+
+            targetCtx.fillStyle = rayGrad;
+            targetCtx.globalAlpha = pulse;
+            targetCtx.beginPath();
+            targetCtx.moveTo(offset - 6, height * 0.36);
+            targetCtx.lineTo(offset + 6, height * 0.36);
+            targetCtx.lineTo(offset * 1.5 + 12, height * 0.68);
+            targetCtx.lineTo(offset * 1.5 - 12, height * 0.68);
+            targetCtx.closePath();
+            targetCtx.fill();
+          }
+          targetCtx.globalAlpha = 1;
+        } else {
+          targetCtx.fillStyle = 'rgba(2, 6, 23, 0.55)';
+          targetCtx.beginPath();
+          targetCtx.ellipse(0, height * 0.43, width * 0.44, 9, 0, 0, Math.PI * 2);
+          targetCtx.fill();
+        }
+
+        // 2. Draw Selected Bus Rear Image ("image_9bd969.png" or "image_9bd949.png" or baked replica)
+        const skinKey = config.skin; // 'base' | 'vip'
+        if (externalSkins[skinKey] && externalSkins[skinKey].loaded) {
+          targetCtx.drawImage(externalSkins[skinKey].img, -width / 2, -height / 2, width, height);
+        } else {
+          const fallbackSprite = skinKey === 'vip' ? bakedVipBus : bakedBaseBus;
+          targetCtx.drawImage(fallbackSprite, -width / 2, -height / 2, width, height);
+        }
+
+        // 3. Draw Flashing Party Lights on Rear Windshield & Taillights if enabled
+        if (config.partyLights) {
+          const ledColors = ['#ff007f', '#00f0ff', '#facc15', '#22c55e', '#a855f7'];
+          const cIdx = Math.floor(timeTick * 0.2) % ledColors.length;
+
+          targetCtx.save();
+          // Glowing upper and lower brake/signal lamps
+          targetCtx.shadowColor = ledColors[cIdx];
+          targetCtx.shadowBlur = 16;
+          targetCtx.fillStyle = ledColors[cIdx];
+
+          // Left & Right upper triple lamps glow
+          targetCtx.fillRect(-width * 0.34, height * 0.03, width * 0.18, height * 0.055);
+          targetCtx.fillRect(width * 0.16, height * 0.03, width * 0.18, height * 0.055);
+
+          // Left & Right lower bumper taillights glow
+          const cIdx2 = (cIdx + 2) % ledColors.length;
+          targetCtx.shadowColor = ledColors[cIdx2];
+          targetCtx.fillStyle = ledColors[cIdx2];
+          targetCtx.fillRect(-width * 0.35, height * 0.31, width * 0.19, height * 0.05);
+          targetCtx.fillRect(width * 0.16, height * 0.31, width * 0.19, height * 0.05);
+
+          // Rear Windshield top colorful Thorana LED fairy lights
+          for (let i = 0; i < 7; i++) {
+            const lx = -width * 0.30 + i * (width * 0.10);
+            const ly = -height * 0.28 + Math.sin(i * 1.2) * 3;
+            const col = ledColors[(i + Math.floor(timeTick * 0.25)) % ledColors.length];
+            targetCtx.fillStyle = col;
+            targetCtx.shadowColor = col;
+            targetCtx.shadowBlur = 10;
+            targetCtx.beginPath();
+            targetCtx.arc(lx, ly, 3.2, 0, Math.PI * 2);
+            targetCtx.fill();
+          }
+          targetCtx.restore();
+        }
+
+        // 4. Draw Stylish Roof Spoiler Wing if enabled
+        if (config.spoiler) {
+          targetCtx.save();
+          const wingY = -height * 0.42;
+          const wingW = width * 0.92;
+
+          // Vertical Support Struts mounted to roof
+          targetCtx.fillStyle = '#1e293b';
+          targetCtx.strokeStyle = '#090d16';
+          targetCtx.lineWidth = 2;
+          targetCtx.fillRect(-wingW * 0.32, wingY + 4, 8, 14);
+          targetCtx.strokeRect(-wingW * 0.32, wingY + 4, 8, 14);
+          targetCtx.fillRect(wingW * 0.32 - 8, wingY + 4, 8, 14);
+          targetCtx.strokeRect(wingW * 0.32 - 8, wingY + 4, 8, 14);
+
+          // Main Aero Spoiler Blade
+          const bladeGrad = targetCtx.createLinearGradient(-wingW / 2, wingY - 8, wingW / 2, wingY + 6);
+          if (config.skin === 'vip') {
+            bladeGrad.addColorStop(0, '#a855f7');
+            bladeGrad.addColorStop(0.5, '#ec4899');
+            bladeGrad.addColorStop(1, '#a855f7');
+          } else {
+            bladeGrad.addColorStop(0, '#334155');
+            bladeGrad.addColorStop(0.5, '#94a3b8');
+            bladeGrad.addColorStop(1, '#334155');
+          }
+
+          targetCtx.fillStyle = bladeGrad;
+          targetCtx.strokeStyle = '#090d16';
+          targetCtx.lineWidth = 2.5;
+
+          targetCtx.beginPath();
+          // Swept-up winglets on both ends (matching the reference image!)
+          targetCtx.moveTo(-wingW * 0.52, wingY - 12);
+          targetCtx.lineTo(-wingW * 0.43, wingY - 2);
+          targetCtx.lineTo(wingW * 0.43, wingY - 2);
+          targetCtx.lineTo(wingW * 0.52, wingY - 12);
+          targetCtx.lineTo(wingW * 0.48, wingY + 7);
+          targetCtx.lineTo(-wingW * 0.48, wingY + 7);
+          targetCtx.closePath();
+          targetCtx.fill();
+          targetCtx.stroke();
+
+          // Racing stripe on spoiler
+          targetCtx.fillStyle = '#fde047';
+          targetCtx.fillRect(-wingW * 0.36, wingY + 1, wingW * 0.72, 2.5);
+          targetCtx.restore();
+        }
+
+        targetCtx.restore();
+      }
+
+      const HORIZON_Y = 190;
+      const ROAD_TOP_WIDTH = 92;
+      const ROAD_BOTTOM_WIDTH = 440;
+      const PLAYER_Y = 485;
+      const BUS_DRAW_W = 122;
+      const BUS_DRAW_H = 138;
+
+      const DANSAL_FOOD_TYPES = [
+        {
+          id: 'rice',
+          name: 'බත් දන්සල!',
+          sub: 'Rice & Curry +16%',
+          fillAmount: 16,
+          score: 60
+        },
+        {
+          id: 'faluda',
+          name: 'සරුවත් දන්සල!',
+          sub: 'Rose Saruwath +12%',
+          fillAmount: 12,
+          score: 45
+        },
+        {
+          id: 'icecream',
+          name: 'අයිස් ක්‍රීම්!',
+          sub: 'Ice Cream +14%',
+          fillAmount: 14,
+          score: 50
+        },
+        {
+          id: 'kadala',
+          name: 'කඩල දන්සල!',
+          sub: 'Spicy Kadala +13%',
+          fillAmount: 13,
+          score: 50
+        }
+      ];
+
+      const state = {
+        running: false,
+        paused: false,
+        tick: 0,
+        score: 0,
+        bestScore: 0,
+        dansalCount: 0,
+        speed: 4.5,
+        roadOffset: 0,
+        screenShake: 0,
+        hornTimer: 0,
+
+        // Customization Config
+        custom: {
+          skin: 'vip', // 'base' ("image_9bd969.png") | 'vip' ("image_9bd949.png")
+          partyLights: true,
+          spoiler: true
+        },
+
+        // Player Bus Horizontal State (-1 = Left Lane, 0 = Center, +1 = Right Lane, continuous X)
+        player: {
+          laneOffset: 0, // ranges from -1.15 to +1.15
+          vx: 0,
+          tilt: 0
+        },
+
+        // Stomach Meter (බඩ / Badak): 0% = Starving Game Over, 100% = Overeating Game Over
+        stomach: 52,
+
+        // Input Flags
+        keys: {
+          left: false,
+          right: false
+        },
+
+        // Dynamic World Entities (progress z from 0.0 at horizon to 1.2 at bottom)
+        scenery: [],
+        foods: [],
+        traffic: [],
+        popups: [],
+
+        // Spawners
+        sceneryTimer: 10,
+        foodTimer: 25,
+        trafficTimer: 55
+      };
+
+      function syncCustomizationUI() {
+        const isVip = state.custom.skin === 'vip';
+
+        // Update Garage Skin Buttons
+        if (isVip) {
+          selectVipSkinBtn.className =
+            'px-2.5 py-2 rounded-lg border-2 border-fuchsia-400 bg-fuchsia-950/60 text-left transition flex flex-col cursor-pointer shadow-md shadow-fuchsia-500/20';
+          selectBaseSkinBtn.className =
+            'px-2.5 py-2 rounded-lg border-2 border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-left transition flex flex-col cursor-pointer';
+          vipSkinCheck.textContent = '●';
+          baseSkinCheck.textContent = '○';
+          previewSkinName.textContent = 'දම් රැජිණ VIP (image_9bd949.png)';
+          activeSkinBadge.textContent = 'VIP Dam Rajina Skin';
+        } else {
+          selectBaseSkinBtn.className =
+            'px-2.5 py-2 rounded-lg border-2 border-amber-400 bg-slate-800 text-left transition flex flex-col cursor-pointer shadow-md shadow-amber-500/20';
+          selectVipSkinBtn.className =
+            'px-2.5 py-2 rounded-lg border-2 border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-left transition flex flex-col cursor-pointer';
+          baseSkinCheck.textContent = '●';
+          vipSkinCheck.textContent = '○';
+          previewSkinName.textContent = 'Base White (image_9bd969.png)';
+          activeSkinBadge.textContent = 'Base White Leyland';
+        }
+
+        togglePartyLights.checked = state.custom.partyLights;
+        toggleSpoiler.checked = state.custom.spoiler;
+
+        // Toggle CSS Neon Animation class on the Garage preview wrapper
+        if (state.custom.partyLights) {
+          garagePreviewWrapper.classList.add('party-lights-glow');
+        } else {
+          garagePreviewWrapper.classList.remove('party-lights-glow');
+        }
+
+        // Toggle in-game CSS Neon Taillight overlay
+        if (state.running && state.custom.partyLights) {
+          liveCssPartyLights.classList.remove('hidden');
+        } else {
+          liveCssPartyLights.classList.add('hidden');
+        }
+
+        renderGaragePreview();
+      }
+
+      function renderGaragePreview() {
+        garageCtx.clearRect(0, 0, garageCanvas.width, garageCanvas.height);
+        drawCustomizedBus(
+          garageCtx,
+          garageCanvas.width / 2,
+          garageCanvas.height / 2 + 6,
+          112,
+          126,
+          state.custom,
+          state.tick
+        );
+      }
+
+      selectBaseSkinBtn.addEventListener('click', () => {
+        state.custom.skin = 'base';
+        syncCustomizationUI();
+      });
+
+      selectVipSkinBtn.addEventListener('click', () => {
+        state.custom.skin = 'vip';
+        syncCustomizationUI();
+      });
+
+      togglePartyLights.addEventListener('change', (e) => {
+        state.custom.partyLights = e.target.checked;
+        syncCustomizationUI();
+      });
+
+      toggleSpoiler.addEventListener('change', (e) => {
+        state.custom.spoiler = e.target.checked;
+        syncCustomizationUI();
+      });
+
+      openGarageBtn.addEventListener('click', () => {
+        state.running = false;
+        gameOverBanner.classList.add('hidden');
+        startDriveBtnText.textContent = 'RESUME / START RUN! (යමු!)';
+        garageModal.classList.remove('opacity-0', 'pointer-events-none');
+        syncCustomizationUI();
+      });
+
+      muteBtn.addEventListener('click', () => {
+        isMuted = !isMuted;
+        muteBtn.textContent = isMuted ? '🔇' : '🔊';
+      });
+
+      // Maps depth z (0 = horizon, 1 = player row, >1 = bottom edge) and laneOffset (-1 = left lane, 0 = center, +1 = right lane) to 2D canvas coordinates
+      function projectRoadPoint(z, laneOffset) {
+        const clampedZ = Math.max(0.01, z);
+        // Perspective curve so objects accelerate visually as they approach the camera
+        const p = Math.pow(clampedZ, 1.45);
+        const y = HORIZON_Y + p * (600 - HORIZON_Y);
+        const roadWidthAtZ = ROAD_TOP_WIDTH + p * (ROAD_BOTTOM_WIDTH - ROAD_TOP_WIDTH);
+        const x = 300 + laneOffset * (roadWidthAtZ * 0.33);
+        const scale = 0.22 + p * 0.88;
+        return { x, y, roadWidthAtZ, scale, p };
+      }
+
+      function getPlayerScreenX() {
+        const proj = projectRoadPoint(0.82, state.player.laneOffset);
+        return proj.x;
+      }
+
+      function addPopup(text, x, y, color = '#fde047', size = 18) {
+        state.popups.push({
+          text,
+          x,
+          y,
+          vy: -1.5,
+          life: 48,
+          maxLife: 48,
+          color,
+          size
+        });
+      }
+
+      // Spawn roadside Buddhist Temples (Pansal), Dansal Stalls, and Coconut Palms
+      function spawnRoadsideScenery(initialZ = 0.02) {
+        const side = Math.random() < 0.5 ? -1 : 1;
+        const rand = Math.random();
+        let kind = 'palm';
+        if (rand < 0.36) kind = 'pansal'; // Buddhist Temple (Stupa + Buddhist Flags)
+        else if (rand < 0.74) kind = 'dansal_stall'; // Yellow Dansal Booth with "දන්සල් කෑම / කමු කමු!"
+        else kind = 'palm';
+
+        state.scenery.push({
+          kind,
+          side,
+          z: initialZ
+        });
+      }
+
+      // Spawn collectible Dansal Food on the road
+      function spawnDansalFood() {
+        const lanes = [-0.82, 0, 0.82];
+        const lane = lanes[Math.floor(Math.random() * lanes.length)];
+        const foodType = DANSAL_FOOD_TYPES[Math.floor(Math.random() * DANSAL_FOOD_TYPES.length)];
+
+        state.foods.push({
+          ...foodType,
+          lane,
+          z: 0.02
+        });
+      }
+
+      // Spawn oncoming or slower traffic obstacles (Tuk-Tuks, Lorries, Cars)
+      function spawnTrafficObstacle() {
+        const lanes = [-0.82, 0, 0.82];
+        const lane = lanes[Math.floor(Math.random() * lanes.length)];
+
+        // Avoid spawning right on top of a food item at the horizon
+        const tooClose = state.foods.some(f => f.z < 0.18 && Math.abs(f.lane - lane) < 0.3);
+        if (tooClose) return;
+
+        const types = ['tuktuk', 'lorry', 'car'];
+        const vType = types[Math.floor(Math.random() * types.length)];
+
+        state.traffic.push({
+          vType,
+          lane,
+          z: 0.02,
+          speedFactor: vType === 'tuktuk' ? 0.85 : vType === 'lorry' ? 0.95 : 1.08,
+          honkedAt: false
+        });
+      }
+
+      function triggerHorn() {
+        playBusAirHorn();
+        state.hornTimer = 24;
+        state.screenShake = 4;
+
+        const px = getPlayerScreenX();
+        addPopup('PEEP PEEP! 🎺', px, PLAYER_Y - 75, '#38bdf8', 17);
+
+        // Honking makes nearby Tuk-Tuks in the same lane swerve slightly aside!
+        state.traffic.forEach(veh => {
+          if (veh.vType === 'tuktuk' && !veh.honkedAt && veh.z > 0.25 && veh.z < 0.78) {
+            if (Math.abs(veh.lane - state.player.laneOffset) < 0.45) {
+              veh.honkedAt = true;
+              veh.lane = veh.lane <= 0 ? 0.85 : -0.85;
+              state.score += 35;
+              const vp = projectRoadPoint(veh.z, veh.lane);
+              addPopup('TUK DODGE! +35', vp.x, vp.y - 30, '#4ade80', 14);
+            }
+          }
+        });
+      }
+
+      function startNewGame() {
+        initAudio();
+        state.running = true;
+        state.paused = false;
+        state.score = 0;
+        state.dansalCount = 0;
+        state.speed = 4.5;
+        state.stomach = 52; // Start right in the middle ("NORMAL")
+        state.player.laneOffset = 0;
+        state.player.vx = 0;
+        state.player.tilt = 0;
+
+        state.scenery = [];
+        state.foods = [];
+        state.traffic = [];
+        state.popups = [];
+
+        // Pre-populate roadside Pansal temples & Dansal stalls along the road
+        for (let i = 1; i <= 6; i++) {
+          spawnRoadsideScenery(i * 0.15);
+        }
+
+        state.sceneryTimer = 18;
+        state.foodTimer = 20;
+        state.trafficTimer = 48;
+
+        garageModal.classList.add('opacity-0', 'pointer-events-none');
+        syncCustomizationUI();
+        playBusAirHorn();
+      }
+
+      function triggerGameOver(reasonSinhala, isCrash = false) {
+        state.running = false;
+        playGameOverSound(isCrash);
+
+        if (state.score > state.bestScore) {
+          state.bestScore = Math.floor(state.score);
+        }
+
+        gameOverReason.textContent = reasonSinhala;
+        finalScoreText.textContent = Math.floor(state.score);
+        finalDansalText.textContent = state.dansalCount;
+        bestScoreText.textContent = state.bestScore;
+
+        gameOverBanner.classList.remove('hidden');
+        startDriveBtnText.textContent = 'PLAY AGAIN (ආයෙත් යමු!)';
+        garageModal.classList.remove('opacity-0', 'pointer-events-none');
+        liveCssPartyLights.classList.add('hidden');
+        syncCustomizationUI();
+      }
+
+      function updateGame() {
+        state.tick++;
+
+        if (!state.running || state.paused) {
+          if (! garageModal.classList.contains('opacity-0')) {
+            renderGaragePreview();
+          }
+          return;
+        }
+
+        // Gradually increase driving speed over time
+        state.speed = Math.min(8.2, 4.5 + state.score / 2800);
+        const zStep = state.speed * 0.0023;
+
+        state.roadOffset = (state.roadOffset + state.speed * 2.2) % 100;
+        state.score += state.speed * 0.16;
+
+        if (state.hornTimer > 0) state.hornTimer--;
+        if (state.screenShake > 0) state.screenShake *= 0.84;
+
+        // 1. Update Player Horizontal Swerving
+        const steerSpeed = 0.042;
+        if (state.keys.left) {
+          state.player.laneOffset = Math.max(-1.05, state.player.laneOffset - steerSpeed);
+          state.player.tilt = -0.06;
+        } else if (state.keys.right) {
+          state.player.laneOffset = Math.min(1.05, state.player.laneOffset + steerSpeed);
+          state.player.tilt = 0.06;
+        } else {
+          state.player.tilt *= 0.8;
+        }
+
+        // Sync DOM CSS Party Lights overlay position with the bus on canvas
+        if (state.custom.partyLights) {
+          const px = getPlayerScreenX();
+          const pctLeft = ((px - 55) / 600) * 100;
+          const pctTop = ((PLAYER_Y + 18) / 600) * 100;
+          liveCssPartyLights.style.left = `${pctLeft}%`;
+          liveCssPartyLights.style.top = `${pctTop}%`;
+        }
+
+        // 2. Update Stomach Meter (බඩ / Badak)
+        // Slowly decreases over time (digestion)
+        const digestionRate = 0.095 + state.speed * 0.006;
+        state.stomach -= digestionRate;
+
+        // Low/High Stomach audio warning pulse
+        if ((state.stomach < 18 || state.stomach > 85) && state.tick % 55 === 0) {
+          playStomachWarningSound();
+        }
+
+        // Check Starving Game Over (0%)
+        if (state.stomach <= 0) {
+          state.stomach = 0;
+          triggerGameOver('😫 බඩගිනියි මචං! දන්සල් කෑම නැතුව කලන්තේ දැම්මා! (Starved: Stomach 0%)', false);
+          return;
+        }
+
+        // 3. Spawn & Update Roadside Scenery (Pansal Temples & Dansal Stalls)
+        state.sceneryTimer--;
+        if (state.sceneryTimer <= 0) {
+          spawnRoadsideScenery(0.01);
+          state.sceneryTimer = Math.max(16, Math.floor(34 - state.speed * 1.8));
+        }
+
+        for (let i = state.scenery.length - 1; i >= 0; i--) {
+          state.scenery[i].z += zStep;
+          if (state.scenery[i].z > 1.25) {
+            state.scenery.splice(i, 1);
+          }
+        }
+
+        // 4. Spawn & Update Dansal Food Collectibles
+        state.foodTimer--;
+        if (state.foodTimer <= 0) {
+          spawnDansalFood();
+          state.foodTimer = Math.max(28, Math.floor(58 - state.speed * 2.5 + Math.random() * 22));
+        }
+
+        const playerX = getPlayerScreenX();
+
+        for (let i = state.foods.length - 1; i >= 0; i--) {
+          const food = state.foods[i];
+          food.z += zStep;
+
+          const proj = projectRoadPoint(food.z, food.lane);
+
+          // Check collision with Player Bus (z around 0.72 to 0.92)
+          if (food.z >= 0.71 && food.z <= 0.93) {
+            const dx = Math.abs(proj.x - playerX);
+            if (dx < 54) {
+              state.stomach += food.fillAmount;
+              state.dansalCount++;
+              state.score += food.score;
+              playEatFoodSound(state.stomach);
+
+              addPopup(`${food.name} +${food.score}`, proj.x, proj.y - 35, '#4ade80', 16);
+              addPopup('කමු කමු! 😋', playerX, PLAYER_Y - 82, '#fde047', 15);
+
+              state.foods.splice(i, 1);
+
+              // Check Overeating Game Over (100%+)
+              if (state.stomach >= 100) {
+                state.stomach = 100;
+                state.screenShake = 12;
+                triggerGameOver('🤢 බඩ පැලෙන්නම දන්සල් කෑවා! (Overeating: Stomach 100% Full!)', false);
+                return;
+              }
+              continue;
+            }
+          }
+
+          if (food.z > 1.18) {
+            state.foods.splice(i, 1);
+          }
+        }
+
+        // 5. Spawn & Update Traffic Obstacles (Tuk-Tuks, Lorries, Cars)
+        state.trafficTimer--;
+        if (state.trafficTimer <= 0) {
+          spawnTrafficObstacle();
+          state.trafficTimer = Math.max(36, Math.floor(82 - state.speed * 4.2 + Math.random() * 25));
+        }
+
+        for (let i = state.traffic.length - 1; i >= 0; i--) {
+          const veh = state.traffic[i];
+          veh.z += zStep * veh.speedFactor;
+
+          const proj = projectRoadPoint(veh.z, veh.lane);
+
+          // Check crash with Player Bus
+          if (veh.z >= 0.73 && veh.z <= 0.91) {
+            const hitWidth = veh.vType === 'lorry' ? 54 : 46;
+            if (Math.abs(proj.x - playerX) < hitWidth) {
+              state.screenShake = 16;
+              const crashName =
+                veh.vType === 'tuktuk'
+                  ? '💥 ත්‍රීවීල් එකක හැප්පුනා! (Crashed into Tuk-Tuk!)'
+                  : veh.vType === 'lorry'
+                  ? '💥 ලොරියක හැප්පුනා! (Crashed into Lorry!)'
+                  : '💥 කාර් එකක හැප්පුනා! (Crashed into Car!)';
+              triggerGameOver(crashName, true);
+              return;
+            }
+          }
+
+          if (veh.z > 1.2) {
+            state.traffic.splice(i, 1);
+          }
+        }
+
+        // 6. Update Floating Popups
+        for (let i = state.popups.length - 1; i >= 0; i--) {
+          const pop = state.popups[i];
+          pop.y += pop.vy;
+          pop.life--;
+          if (pop.life <= 0) state.popups.splice(i, 1);
+        }
+      }
+
+      function drawSkyAndMountains() {
+        // Sunny Sri Lankan Sky Gradient
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, HORIZON_Y);
+        skyGrad.addColorStop(0, '#0ea5e9');
+        skyGrad.addColorStop(0.55, '#38bdf8');
+        skyGrad.addColorStop(1, '#bae6fd');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, 600, HORIZON_Y);
+
+        // Distant Central Highlands Mountain Range
+        ctx.fillStyle = '#5b8a72';
+        ctx.beginPath();
+        ctx.moveTo(0, HORIZON_Y);
+        ctx.quadraticCurveTo(95, HORIZON_Y - 58, 195, HORIZON_Y - 18);
+        ctx.quadraticCurveTo(300, HORIZON_Y - 64, 415, HORIZON_Y - 22);
+        ctx.quadraticCurveTo(510, HORIZON_Y - 54, 600, HORIZON_Y - 12);
+        ctx.lineTo(600, HORIZON_Y);
+        ctx.closePath();
+        ctx.fill();
+
+        // Foreground Rolling Green Tea Hills
+        ctx.fillStyle = '#4d7c0f';
+        ctx.beginPath();
+        ctx.moveTo(0, HORIZON_Y);
+        ctx.quadraticCurveTo(140, HORIZON_Y - 32, 265, HORIZON_Y - 4);
+        ctx.quadraticCurveTo(420, HORIZON_Y - 30, 600, HORIZON_Y);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function drawHighwayRoad() {
+        // Lush Green Roadside Grass
+        const grassGrad = ctx.createLinearGradient(0, HORIZON_Y, 0, 600);
+        grassGrad.addColorStop(0, '#84cc16');
+        grassGrad.addColorStop(0.5, '#65a30d');
+        grassGrad.addColorStop(1, '#4d7c0f');
+        ctx.fillStyle = grassGrad;
+        ctx.fillRect(0, HORIZON_Y, 600, 600 - HORIZON_Y);
+
+        // Sandy Roadside Shoulders
+        ctx.fillStyle = '#d6a87c';
+        ctx.beginPath();
+        ctx.moveTo(300 - ROAD_TOP_WIDTH * 0.65, HORIZON_Y);
+        ctx.lineTo(300 + ROAD_TOP_WIDTH * 0.65, HORIZON_Y);
+        ctx.lineTo(300 + ROAD_BOTTOM_WIDTH * 0.62, 600);
+        ctx.lineTo(300 - ROAD_BOTTOM_WIDTH * 0.62, 600);
+        ctx.closePath();
+        ctx.fill();
+
+        // Main Asphalt 3-Lane Highway Trapezoid
+        const roadGrad = ctx.createLinearGradient(0, HORIZON_Y, 0, 600);
+        roadGrad.addColorStop(0, '#64748b');
+        roadGrad.addColorStop(1, '#334155');
+        ctx.fillStyle = roadGrad;
+        ctx.beginPath();
+        ctx.moveTo(300 - ROAD_TOP_WIDTH / 2, HORIZON_Y);
+        ctx.lineTo(300 + ROAD_TOP_WIDTH / 2, HORIZON_Y);
+        ctx.lineTo(300 + ROAD_BOTTOM_WIDTH / 2, 600);
+        ctx.lineTo(300 - ROAD_BOTTOM_WIDTH / 2, 600);
+        ctx.closePath();
+        ctx.fill();
+
+        // Solid White Outer Road Edge Lines
+        ctx.strokeStyle = '#f8fafc';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(300 - ROAD_TOP_WIDTH * 0.46, HORIZON_Y);
+        ctx.lineTo(300 - ROAD_BOTTOM_WIDTH * 0.47, 600);
+        ctx.moveTo(300 + ROAD_TOP_WIDTH * 0.46, HORIZON_Y);
+        ctx.lineTo(300 + ROAD_BOTTOM_WIDTH * 0.47, 600);
+        ctx.stroke();
+
+        // Animated Perspective Dashed Lane Dividers (3 Lanes)
+        ctx.strokeStyle = '#f8fafc';
+        const numDashes = 9;
+        for (let i = 0; i < numDashes; i++) {
+          const z1 = ((i + (state.roadOffset / 100)) / numDashes) % 1;
+          const z2 = Math.min(1.0, z1 + 0.055);
+          if (z2 <= z1) continue;
+
+          [-0.33, 0.33].forEach(dividerOffset => {
+            const p1 = projectRoadPoint(z1, dividerOffset * 1.45);
+            const p2 = projectRoadPoint(z2, dividerOffset * 1.45);
+            ctx.lineWidth = Math.max(1.5, p1.scale * 5);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          });
+        }
+      }
+
+      // Draw 5-color Sri Lankan Buddhist Flag (ෂඩ් වර්ණ බෞද්ධ කොඩිය)
+      function drawBuddhistFlag(x, y, scale) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+
+        // Flagpole
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(-2, -95, 4, 95);
+
+        const colors = ['#1d4ed8', '#facc15', '#dc2626', '#f8fafc', '#f97316'];
+        const stripH = 11;
+        for (let i = 0; i < 5; i++) {
+          ctx.fillStyle = colors[i];
+          ctx.fillRect(2, -92 + i * stripH, 26, stripH);
+        }
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(2, -92, 26, stripH * 5);
+        ctx.restore();
+      }
+
+      // Draw Roadside Buddhist Temple (Pansal - Golden Dagoba/Stupa, Temple Roof, Walakulu Bamma Wall & Flags)
+      function drawPansalTemple(item) {
+        const proj = projectRoadPoint(item.z, item.side * 1.95);
+        const s = proj.scale;
+        ctx.save();
+        ctx.translate(proj.x, proj.y);
+        ctx.scale(s, s);
+
+        // Golden/White Dagoba (Stupa / චෛත්‍යය)
+        ctx.fillStyle = '#facc15';
+        ctx.strokeStyle = '#78350f';
+        ctx.lineWidth = 2.5;
+        // Dome (ගර්භය)
+        ctx.beginPath();
+        ctx.arc(item.side * 38, -28, 38, Math.PI, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Base terraces (පේසා වළලු)
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(item.side * 38 - 44, -28, 88, 14);
+        ctx.strokeRect(item.side * 38 - 44, -28, 88, 14);
+
+        // Hatharaskotuwa & Spire (හතරැස් කොටුව සහ කොත් කැරැල්ල)
+        ctx.fillStyle = '#eab308';
+        ctx.fillRect(item.side * 38 - 12, -78, 24, 14);
+        ctx.strokeRect(item.side * 38 - 12, -78, 24, 14);
+
+        ctx.beginPath();
+        ctx.moveTo(item.side * 38 - 9, -78);
+        ctx.lineTo(item.side * 38, -112);
+        ctx.lineTo(item.side * 38 + 9, -78);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Traditional White Temple Wall (වළාකුළු බැම්ම)
+        ctx.fillStyle = '#fef3c7';
+        ctx.strokeStyle = '#451a03';
+        ctx.fillRect(-52, -20, 104, 22);
+        ctx.strokeRect(-52, -20, 104, 22);
+
+        // Triangular decorative niches (පහන් කූඩු කවුළු)
+        ctx.fillStyle = '#d97706';
+        for (let n = -36; n <= 36; n += 18) {
+          ctx.beginPath();
+          ctx.moveTo(n, -14);
+          ctx.lineTo(n - 5, -5);
+          ctx.lineTo(n + 5, -5);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Buddhist Flag beside the Temple
+        drawBuddhistFlag(item.side * -42, 0, 0.95);
+
+        ctx.restore();
+      }
+
+      // Draw Roadside Dansal Stall ("දන්සල් කෑම" Yellow Banner, Crowd & "කමු කමු!" Speech Bubble)
+      function drawDansalStall(item) {
+        const proj = projectRoadPoint(item.z, item.side * 1.82);
+        const s = proj.scale;
+        ctx.save();
+        ctx.translate(proj.x, proj.y);
+        ctx.scale(s, s);
+
+        // Wooden Booth Frame & Table
+        ctx.fillStyle = '#f59e0b';
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2.5;
+        ctx.fillRect(-55, -36, 110, 36);
+        ctx.strokeRect(-55, -36, 110, 36);
+
+        // Support Poles
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(-52, -96, 6, 60);
+        ctx.fillRect(46, -96, 6, 60);
+
+        // Bright Yellow & Red "දන්සල් කෑම" Overhead Banner (matching reference image!)
+        ctx.fillStyle = '#facc15';
+        ctx.fillRect(-58, -108, 116, 36);
+        ctx.strokeRect(-58, -108, 116, 36);
+
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(-56, -84, 112, 11);
+
+        ctx.fillStyle = '#dc2626';
+        ctx.font = '800 17px "Noto Sans Sinhala", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('දන්සල් කෑම', 0, -90);
+
+        // Happy Volunteers waving with plates
+        const shirtColors = ['#3b82f6', '#ec4899', '#10b981'];
+        for (let p = -1; p <= 1; p++) {
+          const px = p * 28;
+          // Shirt
+          ctx.fillStyle = shirtColors[p + 1];
+          ctx.fillRect(px - 9, -56, 18, 20);
+          // Head
+          ctx.fillStyle = '#d97706';
+          ctx.beginPath();
+          ctx.arc(px, -64, 8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Comic Speech Bubble ("කමු කමු!" or "දන්සල!")
+        if (item.z > 0.25 && item.z < 0.88) {
+          const bubbleX = item.side < 0 ? 52 : -52;
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#090d16';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.ellipse(bubbleX, -118, 42, 18, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#090d16';
+          ctx.font = '800 13px "Noto Sans Sinhala", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(item.side < 0 ? 'දන්සල!' : 'කමු කමු!', bubbleX, -113);
+        }
+
+        ctx.restore();
+      }
+
+      function drawRoadsidePalm(item) {
+        const proj = projectRoadPoint(item.z, item.side * 1.9);
+        const s = proj.scale;
+        ctx.save();
+        ctx.translate(proj.x, proj.y);
+        ctx.scale(s, s);
+
+        ctx.strokeStyle = '#78350f';
+        ctx.lineWidth = 9;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(item.side * -12, -55, item.side * -22, -105);
+        ctx.stroke();
+
+        ctx.translate(item.side * -22, -105);
+        ctx.fillStyle = '#15803d';
+        [-2.3, -1.6, -0.9, -0.2, 0.5, 1.1].forEach(ang => {
+          ctx.save();
+          ctx.rotate(ang);
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(24, -12, 48, 4);
+          ctx.quadraticCurveTo(24, 2, 0, 0);
+          ctx.fill();
+          ctx.restore();
+        });
+        ctx.restore();
+      }
+
+      function drawDansalFoodItem(food) {
+        const proj = projectRoadPoint(food.z, food.lane);
+        const s = proj.scale;
+
+        ctx.save();
+        ctx.translate(proj.x, proj.y);
+        ctx.scale(s, s);
+
+        // Floating shadow
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.38)';
+        ctx.beginPath();
+        ctx.ellipse(0, 6, 26, 9, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const bobY = Math.sin(state.tick * 0.15 + food.z * 10) * 4;
+        ctx.translate(0, bobY - 12);
+
+        if (food.id === 'rice') {
+          // Rice & Curry Plate (බත් පිඟාන - just like the reference image!)
+          ctx.fillStyle = '#f8fafc';
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 28, 16, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // White Rice Mound
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(-8, -3, 11, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Dhal, Curry & Green Mallum
+          ctx.fillStyle = '#d97706';
+          ctx.beginPath();
+          ctx.arc(9, -4, 7, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#16a34a';
+          ctx.beginPath();
+          ctx.arc(5, 5, 6, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (food.id === 'faluda') {
+          // Saruwath / Orange Drink Cup with Straw (just like the reference image!)
+          ctx.fillStyle = '#f97316';
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(-12, -18);
+          ctx.lineTo(12, -18);
+          ctx.lineTo(9, 14);
+          ctx.lineTo(-9, 14);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // White Lid & Bent Straw
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.ellipse(0, -18, 13, 4, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.strokeStyle = '#f8fafc';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(2, -18);
+          ctx.lineTo(6, -30);
+          ctx.lineTo(13, -32);
+          ctx.stroke();
+        } else if (food.id === 'icecream') {
+          // Pink/Vanilla Dansal Ice Cream Cone
+          ctx.fillStyle = '#d97706';
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(-11, -6);
+          ctx.lineTo(11, -6);
+          ctx.lineTo(0, 18);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#f472b6';
+          ctx.beginPath();
+          ctx.arc(0, -12, 13, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          // Spicy Kadala Cone with Coconut slices
+          ctx.fillStyle = '#fef3c7';
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(-14, -8);
+          ctx.lineTo(14, -8);
+          ctx.lineTo(0, 18);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#ea580c';
+          ctx.beginPath();
+          ctx.ellipse(0, -10, 14, 7, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      function drawTrafficVehicle(veh) {
+        const proj = projectRoadPoint(veh.z, veh.lane);
+        const s = proj.scale;
+
+        ctx.save();
+        ctx.translate(proj.x, proj.y);
+        ctx.scale(s, s);
+
+        // Vehicle Shadow
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.45)';
+        ctx.beginPath();
+        ctx.ellipse(0, 6, 38, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (veh.vType === 'tuktuk') {
+          // Rainbow Custom Sri Lankan Tuk-Tuk (matching the left lane of the reference image!)
+          ctx.strokeStyle = '#090d16';
+          ctx.lineWidth = 2.5;
+
+          // Wheels
+          ctx.fillStyle = '#090d16';
+          ctx.fillRect(-34, -12, 10, 16);
+          ctx.fillRect(24, -12, 10, 16);
+
+          // Rainbow Striped Body
+          const rainbow = ['#ef4444', '#f97316', '#facc15', '#22c55e', '#3b82f6', '#a855f7'];
+          for (let r = 0; r < rainbow.length; r++) {
+            ctx.fillStyle = rainbow[r];
+            ctx.fillRect(-32, -74 + r * 10, 64, 10);
+          }
+          ctx.strokeRect(-32, -74, 64, 60);
+
+          // Rear Window
+          ctx.fillStyle = '#1e293b';
+          ctx.beginPath();
+          ctx.roundRect(-22, -66, 44, 20, 4);
+          ctx.fill();
+          ctx.stroke();
+        } else if (veh.vType === 'lorry') {
+          // Blue Oncoming Sri Lankan Lorry (matching the right lane of the reference image!)
+          ctx.strokeStyle = '#090d16';
+          ctx.lineWidth = 2.5;
+
+          // Brown Cargo Canopy
+          ctx.fillStyle = '#78716c';
+          ctx.beginPath();
+          ctx.roundRect(-38, -96, 76, 48, 6);
+          ctx.fill();
+          ctx.stroke();
+
+          // Blue Front Cab
+          ctx.fillStyle = '#0284c7';
+          ctx.beginPath();
+          ctx.roundRect(-36, -64, 72, 52, 6);
+          ctx.fill();
+          ctx.stroke();
+
+          // Windshield
+          ctx.fillStyle = '#bae6fd';
+          ctx.fillRect(-28, -56, 56, 22);
+          ctx.strokeRect(-28, -56, 56, 22);
+
+          // Headlights & Grille
+          ctx.fillStyle = '#fef08a';
+          ctx.fillRect(-30, -24, 12, 8);
+          ctx.fillRect(18, -24, 12, 8);
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(-14, -25, 28, 10);
+        } else {
+          // White/Red Sedan Car
+          ctx.fillStyle = '#ef4444';
+          ctx.strokeStyle = '#090d16';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.roundRect(-34, -56, 68, 44, 8);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(-24, -48, 48, 18);
+          ctx.strokeRect(-24, -48, 48, 18);
+
+          ctx.fillStyle = '#fef08a';
+          ctx.fillRect(-28, -22, 11, 7);
+          ctx.fillRect(17, -22, 11, 7);
+        }
+
+        ctx.restore();
+      }
+
+      function drawHUD() {
+        ctx.save();
+
+        // 1. Top Left Score Text ("SCORE: 1540")
+        ctx.font = '800 24px "Bungee", sans-serif';
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#090d16';
+        ctx.fillStyle = '#facc15';
+        ctx.textAlign = 'left';
+        const scoreLabel = `SCORE: ${Math.floor(state.score)}`;
+        ctx.strokeText(scoreLabel, 16, 36);
+        ctx.fillText(scoreLabel, 16, 36);
+
+        // 2. Top Center Stomach Meter (බඩ / STOMACH - matching reference image!)
+        const barX = 236;
+        const barY = 26;
+        const barW = 190;
+        const barH = 26;
+
+        // Title "බඩ (STOMACH)" above bar
+        ctx.font = '800 16px "Noto Sans Sinhala", "Bungee", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#090d16';
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeText('බඩ (STOMACH)', barX + barW / 2, 20);
+        ctx.fillText('බඩ (STOMACH)', barX + barW / 2, 20);
+
+        // Outer Purple Capsule Bar
+        ctx.fillStyle = '#3b2763';
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.roundRect(barX, barY, barW, barH, 13);
+        ctx.fill();
+        ctx.stroke();
+
+        // Determine Stomach Status (HUNGRY vs NORMAL vs DANGER FULL)
+        let statusText = 'NORMAL';
+        let statusColor = '#84cc16';
+        if (state.stomach < 24) {
+          statusText = 'බඩගිනියි! (EAT!)';
+          statusColor = '#ef4444';
+        } else if (state.stomach > 78) {
+          statusText = 'පිරිලා! (STOP EATING!)';
+          statusColor = '#f97316';
+        }
+
+        // Fill Progress inside Stomach Bar
+        const fillW = Math.max(8, ((barW - 6) * state.stomach) / 100);
+        const fillGrad = ctx.createLinearGradient(barX, barY, barX + barW, barY);
+        fillGrad.addColorStop(0, '#ef4444');
+        fillGrad.addColorStop(0.3, '#84cc16');
+        fillGrad.addColorStop(0.75, '#eab308');
+        fillGrad.addColorStop(1, '#dc2626');
+
+        ctx.fillStyle = fillGrad;
+        ctx.beginPath();
+        ctx.roundRect(barX + 3, barY + 3, fillW, barH - 6, 10);
+        ctx.fill();
+
+        // Safe zone markers at 20% and 80%
+        ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(barX + barW * 0.22, barY + 3);
+        ctx.lineTo(barX + barW * 0.22, barY + barH - 3);
+        ctx.moveTo(barX + barW * 0.80, barY + 3);
+        ctx.lineTo(barX + barW * 0.80, barY + barH - 3);
+        ctx.stroke();
+
+        // Percentage Text inside Bar
+        ctx.font = '800 13px "Inter", sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 3;
+        const pctLabel = `${Math.round(state.stomach)}%`;
+        ctx.strokeText(pctLabel, barX + barW / 2, barY + 18);
+        ctx.fillText(pctLabel, barX + barW / 2, barY + 18);
+
+        // Status Subtitle below bar
+        ctx.font = '800 13px "Noto Sans Sinhala", "Bungee", sans-serif';
+        ctx.fillStyle = statusColor;
+        ctx.strokeText(statusText, barX + barW / 2, barY + 43);
+        ctx.fillText(statusText, barX + barW / 2, barY + 43);
+
+        // Cute Cartoon Stomach Organ Icon on Left of Bar (matching the reference image!)
+        ctx.save();
+        ctx.translate(barX - 14, barY + 12);
+        ctx.fillStyle = '#f43f5e';
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, 21, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // Green liquid level inside stomach icon
+        ctx.fillStyle = statusColor;
+        ctx.beginPath();
+        ctx.arc(0, 2, 16, 0.15 * Math.PI, 0.85 * Math.PI);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // 3. Top Right Dansal Combo Counter & Pause Button
+        ctx.fillStyle = '#3b2763';
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(452, 14, 92, 26, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = '800 12px "Bungee", sans-serif';
+        ctx.fillStyle = '#fde047';
+        ctx.textAlign = 'center';
+        ctx.fillText(`🍛 x ${state.dansalCount}`, 498, 31);
+
+        // Red Pause Button (top right corner)
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.roundRect(552, 11, 34, 32, 9);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(563, 19, 4, 16);
+        ctx.fillRect(571, 19, 4, 16);
+
+        // 4. Right-Side Quick Accessory Dock (SKIN, LIGHTS, SPOILER — matching reference image!)
+        const dockX = 528;
+        const dockY = 148;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(dockX, dockY, 62, 210, 14);
+        ctx.fill();
+        ctx.stroke();
+
+        const dockBtns = [
+          { y: dockY + 12, label: 'SKIN', icon: '🚌', active: state.custom.skin === 'vip' },
+          { y: dockY + 76, label: 'LIGHTS', icon: '💡', active: state.custom.partyLights },
+          { y: dockY + 140, label: 'WING', icon: '🏎️', active: state.custom.spoiler }
+        ];
+
+        dockBtns.forEach(b => {
+          ctx.fillStyle = b.active ? '#0284c7' : '#1e293b';
+          ctx.strokeStyle = b.active ? '#38bdf8' : '#475569';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.roundRect(dockX + 6, b.y, 50, 56, 10);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.font = '18px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(b.icon, dockX + 31, b.y + 26);
+
+          ctx.font = '800 10px "Bungee", sans-serif';
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#090d16';
+          ctx.lineWidth = 2.5;
+          ctx.strokeText(b.label, dockX + 31, b.y + 47);
+          ctx.fillText(b.label, dockX + 31, b.y + 47);
+        });
+
+        // 5. On-Screen Bottom LEFT & RIGHT Touch Buttons (matching the reference image!)
+        const drawTouchPad = (x, y, label, arrow, isPressed) => {
+          ctx.save();
+          ctx.translate(x, y + (isPressed ? 2 : 0));
+          ctx.fillStyle = isPressed ? 'rgba(250, 204, 21, 0.35)' : 'rgba(15, 23, 42, 0.55)';
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.roundRect(-38, -42, 76, 84, 14);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.font = '800 32px sans-serif';
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#090d16';
+          ctx.lineWidth = 3;
+          ctx.textAlign = 'center';
+          ctx.strokeText(arrow, 0, 2);
+          ctx.fillText(arrow, 0, 2);
+
+          ctx.font = '800 13px "Bungee", sans-serif';
+          ctx.strokeText(label, 0, 30);
+          ctx.fillText(label, 0, 30);
+          ctx.restore();
+        };
+
+        drawTouchPad(54, 536, 'LEFT', '◀', state.keys.left);
+        drawTouchPad(144, 536, 'RIGHT', '▶', state.keys.right);
+        drawTouchPad(546, 536, 'RIGHT', '▶', state.keys.right);
+
+        ctx.restore();
+      }
+
+      function renderGame() {
+        ctx.save();
+        if (state.screenShake > 0.4) {
+          const sx = (Math.random() - 0.5) * state.screenShake;
+          const sy = (Math.random() - 0.5) * state.screenShake;
+          ctx.translate(sx, sy);
+        }
+
+        drawSkyAndMountains();
+        drawHighwayRoad();
+
+        // Sort Roadside Scenery from far horizon (small z) to near camera (large z)
+        const sortedScenery = [...state.scenery].sort((a, b) => a.z - b.z);
+        sortedScenery.forEach(item => {
+          if (item.kind === 'pansal') drawPansalTemple(item);
+          else if (item.kind === 'dansal_stall') drawDansalStall(item);
+          else drawRoadsidePalm(item);
+        });
+
+        // Combine & depth-sort Road Collectibles and Traffic Obstacles
+        const roadEntities = [
+          ...state.foods.map(f => ({ kind: 'food', data: f, z: f.z })),
+          ...state.traffic.map(t => ({ kind: 'traffic', data: t, z: t.z }))
+        ].sort((a, b) => a.z - b.z);
+
+        let playerDrawn = false;
+        const playerX = getPlayerScreenX();
+
+        roadEntities.forEach(ent => {
+          if (!playerDrawn && ent.z > 0.84) {
+            playerDrawn = true;
+            ctx.save();
+            ctx.translate(playerX, PLAYER_Y);
+            ctx.rotate(state.player.tilt);
+            drawCustomizedBus(ctx, 0, 0, BUS_DRAW_W, BUS_DRAW_H, state.custom, state.tick);
+            ctx.restore();
+          }
+
+          if (ent.kind === 'food') drawDansalFoodItem(ent.data);
+          else drawTrafficVehicle(ent.data);
+        });
+
+        if (!playerDrawn) {
+          ctx.save();
+          ctx.translate(playerX, PLAYER_Y);
+          ctx.rotate(state.player.tilt);
+          drawCustomizedBus(ctx, 0, 0, BUS_DRAW_W, BUS_DRAW_H, state.custom, state.tick);
+          ctx.restore();
+        }
+
+        // Draw Floating Sinhala/English Popups
+        state.popups.forEach(pop => {
+          ctx.save();
+          ctx.globalAlpha = Math.min(1, pop.life / 16);
+          ctx.font = `800 ${pop.size}px "Noto Sans Sinhala", "Bungee", sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = '#090d16';
+          ctx.fillStyle = pop.color;
+          ctx.strokeText(pop.text, pop.x, pop.y);
+          ctx.fillText(pop.text, pop.x, pop.y);
+          ctx.restore();
+        });
+
+        drawHUD();
+        ctx.restore();
+      }
+
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+          state.keys.left = true;
+        } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+          state.keys.right = true;
+        } else if (e.code === 'KeyH' || e.code === 'Space') {
+          if (state.running) {
+            e.preventDefault();
+            triggerHorn();
+          }
+        }
+      });
+
+      window.addEventListener('keyup', (e) => {
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+          state.keys.left = false;
+        } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+          state.keys.right = false;
+        }
+      });
+
+      function handleCanvasPointer(clientX, clientY, isDown) {
+        const rect = canvas.getBoundingClientRect();
+        const x = ((clientX - rect.left) / rect.width) * 600;
+        const y = ((clientY - rect.top) / rect.height) * 600;
+
+        if (!isDown) {
+          state.keys.left = false;
+          state.keys.right = false;
+          return;
+        }
+
+        // Check Top-Right Pause / Garage Button
+        if (x >= 548 && x <= 592 && y >= 8 && y <= 48) {
+          openGarageBtn.click();
+          return;
+        }
+
+        // Check Right-Side Quick Customization Dock (SKIN, LIGHTS, WING)
+        if (x >= 526 && x <= 594 && y >= 155 && y <= 360) {
+          if (y < 220) {
+            state.custom.skin = state.custom.skin === 'vip' ? 'base' : 'vip';
+          } else if (y < 285) {
+            state.custom.partyLights = !state.custom.partyLights;
+          } else {
+            state.custom.spoiler = !state.custom.spoiler;
+          }
+          syncCustomizationUI();
+          return;
+        }
+
+        // On-Screen Bottom Touch Pads or Left/Right Halves of the Road
+        if (x >= 10 && x <= 96 && y >= 485) {
+          state.keys.left = true;
+        } else if (x >= 102 && x <= 190 && y >= 485) {
+          state.keys.right = true;
+        } else if (x >= 500 && y >= 485) {
+          state.keys.right = true;
+        } else if (x < 300) {
+          state.keys.left = true;
+        } else {
+          state.keys.right = true;
+        }
+      }
+
+      canvas.addEventListener('pointerdown', (e) => {
+        handleCanvasPointer(e.clientX, e.clientY, true);
+      });
+      canvas.addEventListener('pointerup', (e) => {
+        handleCanvasPointer(e.clientX, e.clientY, false);
+      });
+      canvas.addEventListener('pointercancel', (e) => {
+        handleCanvasPointer(e.clientX, e.clientY, false);
+      });
+
+      function bindHoldBtn(btn, dir) {
+        btn.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          state.keys[dir] = true;
+        });
+        const stop = () => {
+          state.keys[dir] = false;
+        };
+        btn.addEventListener('pointerup', stop);
+        btn.addEventListener('pointerleave', stop);
+        btn.addEventListener('pointercancel', stop);
+      }
+
+      bindHoldBtn(footerLeftBtn, 'left');
+      bindHoldBtn(footerRightBtn, 'right');
+
+      footerHornBtn.addEventListener('click', () => triggerHorn());
+      hornTopBtn.addEventListener('click', () => triggerHorn());
+      startDriveBtn.addEventListener('click', () => startNewGame());
+
+      // Main 60FPS Game Loop
+      function gameLoop() {
+        updateGame();
+        renderGame();
+        requestAnimationFrame(gameLoop);
+      }
+
+      window.onload = function () {
+        for (let i = 1; i <= 5; i++) {
+          spawnRoadsideScenery(i * 0.16);
+        }
+        syncCustomizationUI();
+        renderGame();
+        gameLoop();
+
+        // Automatically transition from the Automaker startup splash screen into the Garage after 2.5 seconds
+        setTimeout(() => {
+          dismissAutomakerSplash();
+        }, 2500);
+      };
+    })();
+  </script>
+</body>
+</html>
